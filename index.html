@@ -752,5 +752,77 @@ main{flex:1;display:flex;overflow:hidden;}
   initApp();
 })();
 </script>
+/* ============================================================
+   Enregistrement du Service Worker - PhysiQ BF
+   ============================================================ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('[PWA] Service Worker enregistré avec succès:', registration.scope);
+        
+        // Vérifier les mises à jour du SW
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('[PWA] Nouveau Service Worker trouvé');
+          
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[PWA] Nouvelle version disponible !');
+              
+              // Afficher une notification à l'utilisateur
+              if (confirm('✨ Une nouvelle version de PhysiQ BF est disponible ! Mettre à jour maintenant ?')) {
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+              }
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        console.error('[PWA] Échec de l\'enregistrement du Service Worker:', error);
+      });
+    
+    // Gérer le mode hors-ligne
+    window.addEventListener('online', () => {
+      console.log('[PWA] Connexion rétablie');
+      document.body.classList.remove('offline');
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('[PWA] Connexion perdue - Mode hors-ligne activé');
+      document.body.classList.add('offline');
+    });
+  });
+}
+
+// Bouton d'installation PWA (pour les navigateurs qui supportent)
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Afficher le bouton d'installation personnalisé
+  const installBtn = document.getElementById('pwa-install-btn');
+  if (installBtn) {
+    installBtn.style.display = 'block';
+    installBtn.addEventListener('click', () => {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('[PWA] Utilisateur a accepté l\'installation');
+        }
+        deferredPrompt = null;
+      });
+    });
+  }
+});
+
+// Détecter si l'app est déjà installée
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true) {
+  console.log('[PWA] Application exécutée en mode standalone');
+}
+</script>
 </body>
 </html>

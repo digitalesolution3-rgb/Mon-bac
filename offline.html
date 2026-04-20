@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhysiQ BF - Hors ligne</title>
+  <style>
+    :root{--bg:#070b12;--surface:#0d1422;--card:#111927;--border:#1e2d44;--accent:#00e5ff;--text:#e8edf5;--muted:#6b7a99;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .offline-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px;max-width:400px;text-align:center;}
+    .offline-icon{font-size:4rem;margin-bottom:20px;}
+    h1{font-size:1.5rem;font-weight:800;margin-bottom:10px;}
+    h1 span{color:var(--accent);}
+    p{color:var(--muted);line-height:1.7;margin-bottom:25px;font-size:.9rem;}
+    .btn{background:linear-gradient(135deg,var(--accent),#0099bb);color:#000;border:none;border-radius:8px;padding:12px 24px;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-block;text-decoration:none;}
+    .btn:hover{opacity:.85;transform:translateY(-1px);}
+    .status{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px;font-size:.75rem;color:var(--muted);}
+    .dot{width:8px;height:8px;background:#ef4444;border-radius:50%;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .cached-info{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:20px;font-size:.75rem;color:var(--muted);}
+    .cached-info strong{color:var(--accent);}
+  </style>
+</head>
+<body>
+  <div class="offline-card">
+    <div class="offline-icon">📡❌</div>
+    <h1>Physi<span style="color:var(--accent)">Q</span> BF</h1>
+    <p>Vous êtes actuellement <strong>hors ligne</strong>.<br>Pas de panique ! Vous pouvez toujours consulter les cours que vous avez déjà visités.</p>
+    
+    <button class="btn" onclick="window.location.reload()">🔄 Réessayer</button>
+    
+    <div class="cached-info">
+      <strong>📚 Contenu disponible hors-ligne :</strong><br>
+      • Cours de physique-chimie déjà consultés<br>
+      • Cours de mathématiques déjà consultés<br>
+      • Miniatures des vidéos<br>
+      • Interface de l'application
+    </div>
+    
+    <div class="status">
+      <span class="dot"></span>
+      <span>En attente de connexion...</span>
+    </div>
+  </div>
+
+  <script>
+    // Vérifier périodiquement si la connexion est revenue
+    let checkInterval = setInterval(() => {
+      fetch('/?nocache=' + Date.now(), { method: 'HEAD' })
+        .then(() => {
+          clearInterval(checkInterval);
+          window.location.reload();
+        })
+        .catch(() => {});
+    }, 5000);
+    
+    // Nettoyer l'intervalle si l'utilisateur quitte la page
+    window.addEventListener('beforeunload', () => {
+      clearInterval(checkInterval);
+    });
+  </script>
+</body>
+</html>
